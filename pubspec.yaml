@@ -1,8 +1,6 @@
 name: nfl_players_app
-description: "A new Flutter project."
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-
-version: 1.0.0+1
+description: A new Flutter project.
+# ... other metadata ...
 
 environment:
   sdk: '>=3.2.4 <4.0.0'
@@ -10,14 +8,15 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.2
-  http: ^0.13.4       # Updated for network requests
-  provider: ^6.0.1    # Added for state management
+  # ... other dependencies ...
 
 dev_dependencies:
+  flutter_lints: ^1.0.0  # Correctly indented
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.0
+  # ... other dev_dependencies ...
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/player.json
