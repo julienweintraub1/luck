@@ -1,58 +1,88 @@
 import 'package:flutter/material.dart';
-import 'player.dart';
-import 'player_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'player_list_manager.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
+  runApp(MyApp(prefs: prefs));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final SharedPreferences prefs;
+
+  const MyApp({Key? key, required this.prefs}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'NFL Players App',
       theme: ThemeData(
-        primarySwatch: Colors.green,
+        primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const PlayerListScreen(),
+      home: PlayerListScreen(prefs: prefs),
     );
   }
 }
 
-class PlayerListScreen extends StatelessWidget {
-  const PlayerListScreen({super.key});
+class PlayerListScreen extends StatefulWidget {
+  final SharedPreferences prefs;
+
+  const PlayerListScreen({Key? key, required this.prefs}) : super(key: key);
+
+  @override
+  _PlayerListScreenState createState() => _PlayerListScreenState();
+}
+
+class _PlayerListScreenState extends State<PlayerListScreen> {
+  late final PlayerListManager manager;
+
+  @override
+  void initState() {
+    super.initState();
+    manager = PlayerListManager(widget.prefs);
+  }
+
+  String currentList = 'QB';
 
   @override
   Widget build(BuildContext context) {
-    final PlayerService playerService = PlayerService();
-
+    var players = manager.getPlayersByPosition(currentList);
     return Scaffold(
-      appBar: AppBar(title: const Text('NFL Players')),
-      body: FutureBuilder<List<Player>>(
-        future: playerService.fetchPlayers(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (snapshot.hasData) {
-            return ListView.builder(
-              itemCount: snapshot.data!.length,
+      appBar: AppBar(
+        title: const Text('NFL Players List'),
+      ),
+      body: Column(
+        children: [
+          DropdownButton<String>(
+            value: currentList,
+            onChanged: (String? newValue) {
+              setState(() {
+                currentList = newValue!;
+              });
+            },
+            items: const <String>['QB', 'RB', 'WR', 'TE', 'K', 'DST']
+                .map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: players.length,
               itemBuilder: (context, index) {
-                Player player = snapshot.data![index];
                 return ListTile(
-                  title: Text(player.name),
-                  subtitle: Text('${player.position} - ${player.team}'),
+                  title: Text(players[index].name),
+                  subtitle: Text(
+                      '${players[index].position} - ${players[index].team}'),
                 );
               },
-            );
-          } else {
-            return const Center(child: Text('No players found'));
-          }
-        },
+            ),
+          ),
+        ],
       ),
     );
   }

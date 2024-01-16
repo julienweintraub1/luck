@@ -1,6 +1,5 @@
 name: nfl_players_app
 description: A new Flutter project.
-# ... other metadata ...
 
 environment:
   sdk: '>=3.2.4 <4.0.0'
@@ -8,14 +7,14 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  # ... other dependencies ...
+  shared_preferences: ^2.0.6
 
 dev_dependencies:
-  flutter_lints: ^1.0.0  # Correctly indented
+  flutter_lints: ^1.0.0
   flutter_test:
     sdk: flutter
-  # ... other dev_dependencies ...
-
+  mockito: ^5.0.0 
+  
 flutter:
   uses-material-design: true
   assets:

@@ -12,4 +12,12 @@ class Player {
       team: json['team'] as String,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'position': position,
+      'team': team,
+    };
+  }
 }
