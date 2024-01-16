@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'player.dart';
 
 class PlayerListManager {
   final SharedPreferences prefs;
-  Map<String, List<Player>> playerLists = {
+
+  PlayerListManager(this.prefs);
+
+  Map<String, List<PlayerListItem>> playerLists = {
     'QB': [],
     'RB': [],
     'WR': [],
@@ -12,8 +14,6 @@ class PlayerListManager {
     'K': [],
     'DST': [],
   };
-
-  PlayerListManager(this.prefs); // Constructor with SharedPreferences parameter
 
   Future<void> savePlayerLists() async {
     Map<String, dynamic> playerListsMap = {};
@@ -28,26 +28,60 @@ class PlayerListManager {
     if (playerListsString != null) {
       Map<String, dynamic> playerListsMap = jsonDecode(playerListsString);
       playerListsMap.forEach((key, value) {
-        List<Player> tempList =
-            (value as List).map((item) => Player.fromJson(item)).toList();
+        List<PlayerListItem> tempList = (value as List)
+            .map((item) => PlayerListItem.fromJson(item))
+            .toList();
         playerLists[key] = tempList;
       });
     }
   }
 
-  void addPlayer(String listName, Player player) {
+  void addPlayer(String listName, PlayerListItem player) {
     if (playerLists.containsKey(listName)) {
       playerLists[listName]!.add(player);
     }
   }
 
-  void removePlayer(String listName, Player player) {
+  void removePlayer(String listName, PlayerListItem player) {
     if (playerLists.containsKey(listName)) {
       playerLists[listName]!.removeWhere((p) => p.name == player.name);
     }
   }
 
-  List<Player> getPlayersByPosition(String position) {
+  List<PlayerListItem> getPlayersByPosition(String position) {
     return playerLists[position] ?? [];
+  }
+
+  void replacePlayerInList(
+      String listName, int index, PlayerListItem newPlayer) {
+    if (playerLists.containsKey(listName) &&
+        index < playerLists[listName]!.length) {
+      playerLists[listName]![index] = newPlayer;
+    }
+  }
+}
+
+class PlayerListItem {
+  final String name;
+  final String position;
+  final String team;
+
+  PlayerListItem(
+      {required this.name, required this.position, required this.team});
+
+  factory PlayerListItem.fromJson(Map<String, dynamic> json) {
+    return PlayerListItem(
+      name: json['name'] as String,
+      position: json['position'] as String,
+      team: json['team'] as String,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'position': position,
+      'team': team,
+    };
   }
 }
